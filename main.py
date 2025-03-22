@@ -10,6 +10,7 @@ class SensorData(BaseModel):
     eGFR: float
     uric_acid: float
 
+
 @app.post("/upload-data/")
 def upload_data(data: SensorData):
     return {"message": "Data received", "data": data}
