@@ -1,0 +1,206 @@
+import requests
+import json
+import ssl
+import pandas as pd  # For data manipulation
+import numpy as np   # For numerical operations
+from sklearn.linear_model import LogisticRegression  # Example model
+from sklearn.model_selection import train_test_split # Example model
+from sklearn.preprocessing import StandardScaler
+
+# -----------------------------------------------------------------------------
+#  SECTION 1: Risk Prediction Model (Example - Replace with your actual model)
+# -----------------------------------------------------------------------------
+
+#This is a very basic example, consider more complex features such as squaring the concentration of a drug.
+def create_features(df):
+  df['baseline_numeric'] = df['baseline_albuminuria'].map({'Normal/Optimal': 0, 'Microalbuminuria': 1, 'Overt Albuminuria': 2})
+  return df
+
+def train_risk_model(data):
+    """Trains a risk prediction model.
+
+    Args:
+        data: A Pandas DataFrame containing patient data (baseline albuminuria,
+              molecule, concentration, change in albuminuria, risk outcome,
+              serum creatinine, uric acid).
+
+    Returns:
+        A trained risk prediction model (e.g., LogisticRegression).
+    """
+
+    # Feature engineering: Creating dummy features from text data
+    data = pd.get_dummies(data, columns=['molecule']) #Creates binary columns if drug X is present for example.
+    data = create_features(data)
+
+    # Prepare features (X) and target (y)
+    X = data[['baseline_numeric','concentration', 'change_albuminuria', 'serum_creatinine', 'uric_acid'] + [col for col in data.columns if 'molecule_' in col]]  # Select features
+    y = data['at_risk']  # 'at_risk' column indicates whether the patient developed albuminuria.
+
+    # Handle missing values (replace with mean or median if needed)
+    X = X.fillna(X.mean())
+
+    # Scale the numeric features using StandardScaler
+    scaler = StandardScaler()
+    X[['concentration', 'change_albuminuria', 'serum_creatinine', 'uric_acid']] = scaler.fit_transform(X[['concentration', 'change_albuminuria', 'serum_creatinine', 'uric_acid']])
+
+
+    # Split data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Train a logistic regression model
+    model = LogisticRegression(random_state=42) #You can adjust parameters for optimal performance
+    model.fit(X_train, y_train)
+
+    #Evaluate (optional - but recommended)
+    accuracy = model.score(X_test, y_test)
+    print(f"Model accuracy on test data: {accuracy:.2f}")
+
+    return model
+
+# -----------------------------------------------------------------------------
+# SECTION 2: Risk Prediction and Data Transmission
+# -----------------------------------------------------------------------------
+
+def predict_risk(model, baseline_albuminuria, molecule, concentration, change_albuminuria, serum_creatinine, uric_acid):
+    """Predicts the risk of developing albuminuria.
+
+    Args:
+        model: The trained risk prediction model.
+        baseline_albuminuria: Baseline albuminuria level ("Normal/Optimal", "Microalbuminuria", "Overt Albuminuria").
+        molecule: Name of the tested molecule.
+        concentration: Concentration of the molecule.
+        change_albuminuria: Change in albuminuria level (relative to baseline).
+        serum_creatinine: Serum creatinine level.
+        uric_acid: Uric acid level.
+
+    Returns:
+        The predicted risk score (a probability).
+    """
+    # Create a DataFrame with the input data (to handle dummy variables and scaling)
+    input_data = pd.DataFrame([{
+        'baseline_albuminuria': baseline_albuminuria,
+        'molecule': molecule,
+        'concentration': concentration,
+        'change_albuminuria': change_albuminuria,
+        'serum_creatinine': serum_creatinine,
+        'uric_acid': uric_acid
+    }])
+
+    # Create dummy features and numeric mapping
+    input_data = pd.get_dummies(input_data, columns=['molecule'])
+    input_data = create_features(input_data)
+
+    # Select the same features used during training
+    X = input_data[['baseline_numeric', 'concentration', 'change_albuminuria', 'serum_creatinine', 'uric_acid'] + [col for col in input_data.columns if 'molecule_' in col]]
+
+    #Handle potential missing columns in input data and scale
+    missing_cols = set(X_train_columns) - set(X.columns)
+    for c in missing_cols:
+        X[c] = 0
+    X = X[X_train_columns]
+
+    #Scale numerical values
+    X[['concentration', 'change_albuminuria', 'serum_creatinine', 'uric_acid']] = scaler.transform(X[['concentration', 'change_albuminuria', 'serum_creatinine', 'uric_acid']])
+
+
+    # Fill NaN values (if any)
+    X = X.fillna(X.mean())
+    # Predict the risk
+    risk_probability = model.predict_proba(X)[:, 1][0] #Get probability of the positive class (at risk)
+
+    return risk_probability
+
+
+def send_data(data, api_url, api_key, cert_path, key_path):
+    """Sends data to the healthcare provider's API endpoint.
+
+    Args:
+        data: The data to send (dictionary).
+        api_url: The URL of the API endpoint.
+        api_key: The API key for authentication.
+        cert_path: Path to the client certificate file.
+        key_path: Path to the client private key file.
+    """
+    headers = {
+        'Content-Type': 'application/json',
+        'X-API-Key': api_key  # Example: API Key authentication
+    }
+
+    try:
+        # Convert data to JSON
+        json_data = json.dumps(data)
+
+        # Send data via HTTPS with certificate-based authentication
+        response = requests.post(api_url, data=json_data, headers=headers, cert=(cert_path, key_path), verify=True) # verify=True enforces SSL verification
+
+        # Check the response status code
+        if response.status_code == 200:
+            print("Data sent successfully!")
+            print(response.text)
+        else:
+            print(f"Error sending data: {response.status_code} - {response.text}")
+
+    except requests.exceptions.RequestException as e:
+        print(f"Connection error: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+
+# -----------------------------------------------------------------------------
+# SECTION 3: Main Execution
+# -----------------------------------------------------------------------------
+
+# Load and prepare your training data (replace with your actual data loading)
+# This is example data.  Replace with a real dataset.
+training_data = pd.DataFrame({
+    'baseline_albuminuria': ['Normal/Optimal', 'Microalbuminuria', 'Overt Albuminuria', 'Normal/Optimal', 'Microalbuminuria'],
+    'molecule': ['Drug X', 'Drug Y', 'Drug X', 'Drug Z', 'Drug Y'],
+    'concentration': [10, 20, 15, 5, 25],
+    'change_albuminuria': [5, 10, -2, 8, 12],
+    'serum_creatinine': [0.8, 1.2, 1.0, 0.9, 1.3],
+    'uric_acid': [5.0, 6.5, 5.5, 4.8, 7.0],
+    'at_risk': [0, 1, 0, 0, 1]  # 0 = not at risk, 1 = at risk
+})
+
+# Train the risk prediction model
+model = train_risk_model(training_data)
+X_train_columns = training_data[['baseline_numeric','concentration', 'change_albuminuria', 'serum_creatinine', 'uric_acid'] + [col for col in training_data.columns if 'molecule_' in col]].columns #Save trained columns
+
+# Example usage:
+baseline_albuminuria = "Microalbuminuria"
+molecule = "Drug X"
+concentration = 12
+change_albuminuria = 7
+serum_creatinine = 1.1
+uric_acid = 6.2
+patient_id = "Patient001"
+
+risk_probability = predict_risk(model, baseline_albuminuria, molecule, concentration, change_albuminuria, serum_creatinine, uric_acid)
+
+print(f"Predicted risk of albuminuria: {risk_probability:.2f}")
+
+# Define a risk threshold
+risk_threshold = 0.7  # Example: 70% risk
+
+if risk_probability >= risk_threshold:
+    # Prepare data to send to the healthcare provider
+    data_to_send = {
+        "patient_id": patient_id,
+        "baseline_albuminuria": baseline_albuminuria,
+        "molecule": molecule,
+        "concentration": concentration,
+        "change_albuminuria": change_albuminuria,
+        "serum_creatinine": serum_creatinine,
+        "uric_acid": uric_acid,
+        "risk_probability": risk_probability
+    }
+
+    # Replace with your actual API URL, API key, certificate paths
+    api_url = "https://your-healthcare-provider.com/api/v1/albuminuria_risk"
+    api_key = "YOUR_API_KEY"
+    cert_path = "path/to/your/client.crt"
+    key_path = "path/to/your/client.key"
+
+    send_data(data_to_send, api_url, api_key, cert_path, key_path)
+else:
+    print("Risk below threshold.  Data not sent.")
