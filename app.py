@@ -1,6 +1,34 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
+
+
+@app.route("/")
+def home():
+    return render_template("home.html")
+
+# Alternate Page Route
+@app.route("/patient1")
+def alternate():
+    return render_template("patient1.html")
+
+@app.route("/patient2")
+def alternate():
+    return render_template("patient2.html")
+
+@app.route("/patient3")
+def alternate():
+    return render_template("patient3.html")
+
+@app.route("/patient4")
+def alternate():
+    return render_template("patient4.html")
+
+@app.route("/patient5")
+def alternate():
+    return render_template("patient5.html")
+
+
 
 def validate_sensor_data(data):
     required_fields = ["albuminuria", "creatinine", "eGFR", "uric_acid"]
