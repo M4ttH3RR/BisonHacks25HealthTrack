@@ -6,6 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
+
 # -------------------------------------------------------------------
 # SECTION 1: DATA PROCESSING & FEATURE ENGINEERING
 # -------------------------------------------------------------------
@@ -19,21 +20,23 @@ def classify_albuminuria(albuminuria):
     else:
         return "Macroalbuminuria"
 
+
 def preprocess_data(df):
     """Processes dataset by cleaning timestamps, classifying albuminuria, and handling missing values."""
     # Convert timestamps to datetime format
     df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
-    
+
     # Classify albuminuria into categories
     df["Albuminuria Category"] = df["Albuminuria (mg/day)"].apply(classify_albuminuria)
-    
+
     # Convert "Alert" column to binary (1 for "Yes", 0 for "No")
     df["Alert"] = (df["Alert"] == "Yes").astype(int)
-    
+
     # Handle missing values by filling with median values
     df.fillna(df.median(numeric_only=True), inplace=True)
-    
+
     return df
+
 
 # Load dataset
 df = pd.DataFrame([
@@ -46,9 +49,11 @@ df = pd.DataFrame([
     ["2025-05-03 08:00", "001", 20, 0.72, 98, 5.4, "No"],
     ["2025-06-03 12:00", "001", 60, 1.25, 45, 6.7, "Yes"],
     ["2025-06-03 18:00", "001", 22, 0.80, 92, 5.1, "No"]
-], columns=["Timestamp", "User_ID", "Albuminuria (mg/day)", "Serum Creatinine (mg/dL)", "eGFR (mL/min/1.73 m²)", "Uric Acid (mg/dL)", "Alert"])
+], columns=["Timestamp", "User_ID", "Albuminuria (mg/day)", "Serum Creatinine (mg/dL)", "eGFR (mL/min/1.73 m²)",
+            "Uric Acid (mg/dL)", "Alert"])
 
 df = preprocess_data(df)
+
 
 # -------------------------------------------------------------------
 # MACHINE LEARNING MODEL
@@ -58,7 +63,7 @@ def train_risk_model(df):
     """Trains a logistic regression model to predict DKD risk based on past alerts."""
     X = df[["Albuminuria (mg/day)", "Serum Creatinine (mg/dL)", "eGFR (mL/min/1.73 m²)", "Uric Acid (mg/dL)"]]
     y = df["Alert"]  # Use real alert labels for training
-    
+
     global scaler  # Store scaler globally for later use
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
@@ -70,7 +75,9 @@ def train_risk_model(df):
     print(f"✅ Model Accuracy: {model.score(X_test, y_test):.2f}")
     return model, scaler
 
+
 model, scaler = train_risk_model(df)
+
 
 # -------------------------------------------------------------------
 # RISK PREDICTION & ALERT SYSTEM
@@ -83,16 +90,19 @@ def predict_risk(model, scaler, albuminuria, creatinine, eGFR, uric_acid):
         return 0, "Unknown (Missing Data)"
 
     input_data = pd.DataFrame([[albuminuria, creatinine, eGFR, uric_acid]],
-                              columns=["Albuminuria (mg/day)", "Serum Creatinine (mg/dL)", "eGFR (mL/min/1.73 m²)", "Uric Acid (mg/dL)"])
+                              columns=["Albuminuria (mg/day)", "Serum Creatinine (mg/dL)", "eGFR (mL/min/1.73 m²)",
+                                       "Uric Acid (mg/dL)"])
     X_scaled = scaler.transform(input_data)
     risk_probability = model.predict_proba(X_scaled)[:, 1][0]
 
     risk_category = "High Risk" if risk_probability >= 0.7 else "Low Risk"
     return risk_probability, risk_category
 
+
 # Example patient
 patient_risk, patient_category = predict_risk(model, scaler, 50, 1.3, 45, 7.5)
 print(f"📊 Predicted Risk: {patient_risk:.2f} ({patient_category})")
+
 
 # -------------------------------------------------------------------
 # DATA TRANSMISSION TO PROVIDERS
@@ -110,6 +120,7 @@ def send_alert(data, api_url, api_key):
             print(f"❌ Error: {response.status_code} - {response.text}")
     except Exception as e:
         print(f"⚠️ Connection Error: {e}")
+
 
 # Send alert if risk is high
 if patient_risk >= 0.7:
