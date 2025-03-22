@@ -1,0 +1,30 @@
+// Define sensor pins (Replace with your actual pins)
+const int albuminuria_sensorPin = A0;  // Example: Analog pin A0
+// Assuming you have sensors connected. This is highly unlikely for creatinine and uric acid without lab analysis
+const int creatinine_sensorPin = A1;   // Example: Analog pin A1 (Manually entered probably)
+const int uric_acid_sensorPin = A2;    // Example: Analog pin A2 (Manually entered probably)
+
+void setup() {
+  Serial.begin(9600);  // Initialize serial communication at 9600 baud
+}
+
+void loop() {
+  // Read sensor values (Assuming they are analog readings)
+  int albuminuria_value = analogRead(albuminuria_sensorPin);
+  int creatinine_value = analogRead(creatinine_sensorPin);
+  int uric_acid_value = analogRead(uric_acid_sensorPin);
+
+  // Convert sensor values to meaningful units (Calibration needed!)
+  // **IMPORTANT:**  You'll need to calibrate these values to get accurate measurements.
+  float albuminuria = map(albuminuria_value, 0, 1023, 0, 100);  // Example: Map to a range of 0-100
+  float creatinine = map(creatinine_value, 0, 1023, 0, 2);    // Example: Map to a range of 0-2
+  float uric_acid = map(uric_acid_value, 0, 1023, 0, 10);     // Example: Map to a range of 0-10
+
+  // Format the data as a comma-separated string
+  String dataString = String(albuminuria) + "," + String(creatinine) + "," + String(uric_acid);
+
+  // Send the data over serial
+  Serial.println(dataString);
+
+  delay(5000);  // Wait 5 seconds before sending the next reading
+}
