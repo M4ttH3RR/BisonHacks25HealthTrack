@@ -3,11 +3,9 @@ import pandas as pd
 
 st.title("Doctor Appointment Scheduling")
 
-# Initialize session state for storing appointments
 if "appointments" not in st.session_state:
     st.session_state.appointments = []
 
-# Appointment Form
 with st.form("appointment_form"):
     st.subheader("Book an Appointment")
 
@@ -24,3 +22,6 @@ if st.session_state.appointments:
     st.subheader("Scheduled Appointments")
     df = pd.DataFrame(st.session_state.appointments)
     st.dataframe(df, use_container_width=True)
+
+if submit:
+    st.success("Appointment Created!")

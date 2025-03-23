@@ -1,16 +1,13 @@
-import requests
-import json
 import pandas as pd
-import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+import time
 import streamlit as st
 
 # -------------------------------------------------------------------
-# SECTION 1: DATA PROCESSING & FEATURE ENGINEERING
-# ----- --------------------------------------------------------------
-
+# DATA PROCESSING & FEATURE ENGINEERING
+# -------------------------------------------------------------------
 def classify_albuminuria(albuminuria):
     """Classifies albuminuria levels into Normal, Micro, or Macro."""
     if albuminuria < 30:
@@ -22,7 +19,7 @@ def classify_albuminuria(albuminuria):
 
 
 def preprocess_data(df):
-    """Processes dataset by cleaning timestamps, classifying albumst.popover(labelinuria, and handling missing values."""
+    """Processes dataset by cleaning timestamps, classifying albuminuria, and handling missing values."""
     # Convert timestamps to datetime format
     df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
 
@@ -37,28 +34,9 @@ def preprocess_data(df):
 
     return df
 
-
-# Load dataset
-df = pd.DataFrame([
-    ["2025-03-01 08:00", "001", 25, 0.85, 95, 5.2, "No"],
-    ["2025-03-01 12:00", "001", 35, 1.12, 58, 6.3, "Yes"],
-    ["2025-03-01 18:00", "001", 28, 0.92, 90, 5.8, "No"],
-    ["2025-04-02 08:00", "001", 42, 1.15, 55, 6.1, "Yes"],
-    ["2025-04-02 12:00", "001", 30, 0.97, 85, 5.5, "No"],
-    ["2025-05-02 18:00", "001", 50, 1.20, 48, 6.5, "Yes"],
-    ["2025-05-03 08:00", "001", 20, 0.72, 98, 5.4, "No"],
-    ["2025-06-03 12:00", "001", 60, 1.25, 45, 6.7, "Yes"],
-    ["2025-06-03 18:00", "001", 22, 0.80, 92, 5.1, "No"]
-], columns=["Timestamp", "User_ID", "Albuminuria (mg/day)", "Serum Creatinine (mg/dL)", "eGFR (mL/min/1.73 m²)",
-            "Uric Acid (mg/dL)", "Alert"])
-
-df = preprocess_data(df)
-
-
 # -------------------------------------------------------------------
 # MACHINE LEARNING MODEL
 # -------------------------------------------------------------------
-
 def train_risk_model(df):
     """Trains a logistic regression model to predict DKD risk based on past alerts."""
     X = df[["Albuminuria (mg/day)", "Serum Creatinine (mg/dL)", "eGFR (mL/min/1.73 m²)", "Uric Acid (mg/dL)"]]
@@ -76,13 +54,9 @@ def train_risk_model(df):
     return model, scaler
 
 
-model, scaler = train_risk_model(df)
-
-
 # -------------------------------------------------------------------
 # RISK PREDICTION & ALERT SYSTEM
 # -------------------------------------------------------------------
-
 def predict_risk(model, scaler, albuminuria, creatinine, eGFR, uric_acid):
     """Predicts DKD risk and handles missing data safely."""
     # Handle missing values
@@ -99,39 +73,51 @@ def predict_risk(model, scaler, albuminuria, creatinine, eGFR, uric_acid):
     return risk_probability, risk_category
 
 
-# Example patient
-patient_risk, patient_category = predict_risk(model, scaler, 50, 1.3, 45, 7.5)
-print(f"📊 Predicted Risk: {patient_risk:.2f} ({patient_category})")
-
-
 # -------------------------------------------------------------------
-# DATA TRANSMISSION TO PROVIDERS
+# MAIN EXECUTION
 # -------------------------------------------------------------------
+def main():
+    # Load the dataset from your CSV file
+    df = pd.read_csv('biomarket_dataset.csv')
 
-def send_alert(data, api_url, api_key):
-    """Sends high-risk patient data to healthcare providers via API."""
-    headers = {'Content-Type': 'application/json', 'X-API-Key': api_key}
+    # Preprocess the data
+    df = preprocess_data(df)
 
-    try:
-        response = requests.post(api_url, json=data, headers=headers)
-        if response.status_code == 200:
-            print("✅ Data successfully sent!")
-        else:
-            print(f"❌ Error: {response.status_code} - {response.text}")
-    except Exception as e:
-        print(f"⚠️ Connection Error: {e}")
+    # Train the model on the dataset
+    model, scaler = train_risk_model(df)
 
+    # Initialize session state for tracking the last update time
+    if "last_update" not in st.session_state:
+        st.session_state.last_update = time.time()
 
-# Send alert if risk is high
-if patient_risk >= 0.7:
-    alert_data = {
-        "User_ID": "001",
-        "Albuminuria": 50,
-        "Serum Creatinine": 1.3,
-        "eGFR": 45,
-        "Uric Acid": 7.5,
-        "Risk Probability": patient_risk
-    }
-    st.popover("label")
- else:
-    print("🟢 No alert sent. Risk below threshold.")
+    # Simulated data string: "2025-03-23 08:00 003 30 1.25 6.7"
+    data_string = "2025-03-23 08:00 003 30 1.25 6.7"
+    list_values = data_string.split()
+
+    # Extract values from the string
+    timestamp, user_id, albuminuria, creatinine, eGFR, uric_acid = list_values
+    albuminuria, creatinine, eGFR, uric_acid = float(albuminuria), float(creatinine), float(eGFR), float(uric_acid)
+
+    # Predict risk for the patient using received data
+    patient_risk, patient_category = predict_risk(model, scaler, albuminuria, creatinine, eGFR, uric_acid)
+    print(f"📊 Predicted Risk for {user_id}: {patient_risk:.2f} ({patient_category})")
+
+    # Display Streamlit popup or notification based on risk
+    if patient_risk >= 0.7:
+        # Use JavaScript to show pop-up for high risk
+        st.markdown(f"""
+        <script type="text/javascript">
+            alert("🚨 High Risk Alert for User {user_id}!\\nRisk Probability: {patient_risk:.2f}\\nRisk Category: {patient_category}");
+        </script>
+        """, unsafe_allow_html=True)
+    else:
+        # Use Streamlit success notification
+        st.success(f"✅ Low Risk for User {user_id}\nRisk Probability: {patient_risk:.2f}\nRisk Category: {patient_category}")
+
+    # Check if 30 seconds have passed since the last update
+    if time.time() - st.session_state.last_update >= 4:
+        st.session_state.last_update = time.time()  # Update the last update time
+
+# Run the main function
+if __name__ == "__main__":
+    main()

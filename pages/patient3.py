@@ -31,10 +31,33 @@ df = pd.DataFrame(health_data)
 st.dataframe(df)
 
 data = {
-    "Reading #": list(range(1, 15)),
+    "Reading #": list(range(1, 8)),
     "Glucose Reading (mg/dL)": [121, 132, 125, 125, 135, 143, 118]
 }
 
 df = pd.DataFrame(data)
 
 st.table(df)
+
+
+value = 43
+fig, ax = plt.subplots(figsize=(3, 3), dpi=150)
+wedges, _ = ax.pie(
+    [value, 100 - value],
+    colors = ["#FFFF00", "#d3d3d3"],
+    startangle=90,
+    radius=0.05
+)
+
+ax.text(
+    0, 0,
+    f"{3}",
+    ha="center",
+    va="center",
+    fontsize=10,
+    fontweight="bold",
+)
+
+ax.axis("equal")
+
+st.pyplot(fig)

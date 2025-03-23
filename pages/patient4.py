@@ -30,10 +30,32 @@ st.dataframe(df)
 
 
 data = {
-    "Reading #": list(range(1, 15)),
+    "Reading #": list(range(1, 8)),
     "Glucose Reading (mg/dL)": [121, 118, 118, 141, 137, 113, 130]
 }
 
 df = pd.DataFrame(data)
 
 st.table(df)
+
+value = 100
+fig, ax = plt.subplots(figsize=(3, 3), dpi=150)
+wedges, _ = ax.pie(
+    [value, 100 - value],
+    colors = ["#FF0000", "#d3d3d3"],
+    startangle=90,
+    radius=0.05
+)
+
+ax.text(
+    0, 0,
+    f"{7}",
+    ha="center",
+    va="center",
+    fontsize=10,
+    fontweight="bold",
+)
+
+ax.axis("equal")
+
+st.pyplot(fig)

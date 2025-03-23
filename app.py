@@ -36,5 +36,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Button as a clickable rectangle linking to the scheduling page
 st.markdown('<a href="/scheduling" class="schedule-btn">Schedule</a>', unsafe_allow_html=True)
+
+st.markdown('<a href="/messaging" class="schedule-btn">Message Patient</a>', unsafe_allow_html=True)
+
