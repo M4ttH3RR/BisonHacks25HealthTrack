@@ -1,0 +1,10 @@
+def calculate_compliance_score(glucose_readings):
+    compliant = [g for g in glucose_readings if g <= 130]
+    score = len(compliant) / len(glucose_readings) * 100
+    return round(score, 1)
+
+# More balanced glucose readings
+glucose_readings = [115, 124, 129, 132, 127, 135, 121, 119, 133, 126, 130, 134, 128, 131]
+
+compliance_score = calculate_compliance_score(glucose_readings)
+print(f"Compliance Score: {compliance_score}%")
