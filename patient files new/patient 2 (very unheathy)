@@ -1,0 +1,25 @@
+Timestamp	User_ID	Albuminuria (mg/day)	Serum Creatinine (mg/dL)	Uric Acid (mg/dL)	Risk Score	Risk Level	Alert
+2024-05-01 08:00	002	60	1.40	6.8	3	Moderate Risk	No
+2024-06-01 08:00	002	100	1.60	7.5	5	Moderate Risk	No
+2024-07-01 08:00	002	150	1.80	8.1	6	High Risk - Alert Provider 🚨	Yes
+2024-08-01 08:00	002	200	2.00	8.6	7	High Risk - Alert Provider 🚨	Yes
+2024-09-01 08:00	002	250	2.30	9.2	8	Critical Risk ‼️	Yes
+2024-10-01 08:00	002	300	2.60	9.8	9	Critical Risk ‼️	Yes
+2024-11-01 08:00	002	350	3.00	10.2	10	Urgent Referral Needed 🚑	Yes
+
+
+Reading #	Glucose (mg/dL)
+1	178
+2	165
+3	190
+4	205
+5	212
+6	199
+7	220
+8	198
+9	207
+10	215
+11	200
+12	225
+13	210
+14	230
