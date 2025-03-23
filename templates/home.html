@@ -2,10 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dr. Smith</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to external CSS file -->
 </head>
-
 <body>
+    <h1>Dr. Smith</h1>
+    <h1>Patient list</h1>
+    <div class="patient-list">
+         <div class="patient">
+            <a href="patient1">
+                <img src="static/patient1.jpg" alt="Patient 1">
+                <p>John Doe</p>
+            </a>
+        </div>
 
+         <div class="patient">
+            <a href="patient2">
+                <img src="static/patient2.jpg" alt="Patient 2">
+                <p>Jane Smith</p>
+            </a>
+        </div>
+
+         <div class="patient">
+            <a href="patient3">
+                <img src="static/patient3.jpg" alt="Patient 3">
+                <p>Alice Johnson</p>
+            </a>
+        </div>
+    </div>
+ <script>
+        // Function to show the popup
+        function showPopup() {
+            var popup = document.getElementById("popup");
+            popup.style.display = "block";
+            setTimeout(function() {
+                popup.style.display = "none";
+            }, 3000); // Hide popup after 3 seconds
+        }
+
+        // Periodically check for a "hello" message from the Arduino
+        setInterval(function() {
+            fetch('/check-arduino')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.popup) {
+                        showPopup();
+                    }
+                });
+        }, 1000); // Check every 1 second
+    </script>
 </body>
 </html>

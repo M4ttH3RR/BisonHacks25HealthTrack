@@ -1,7 +1,10 @@
+import serial
+import time
 from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
-
+arduino = serial.Serial('COM3', 9600)
+time.sleep(2)
 
 @app.route("/")
 def home():
@@ -9,26 +12,45 @@ def home():
 
 # Alternate Page Route
 @app.route("/patient1")
-def alternate():
+def patient1():
     return render_template("patient1.html")
 
 @app.route("/patient2")
-def alternate():
+def patient2():
     return render_template("patient2.html")
 
 @app.route("/patient3")
-def alternate():
+def patient3():
     return render_template("patient3.html")
 
 @app.route("/patient4")
-def alternate():
+def patient4():
     return render_template("patient4.html")
 
 @app.route("/patient5")
-def alternate():
+def patient5():
     return render_template("patient5.html")
 
+@app.route("/patient6")
+def patient6():
+    return render_template("patient6.html")
 
+@app.route("/patient7")
+def patient7():
+    return render_template("patient7.html")
+
+@app.route("/patient8")
+def patient8():
+    return render_template("patient8.html")
+
+@app.route('/check-arduino')
+def check_arduino():
+    # Read data from Arduino
+    if arduino.in_waiting > 0:
+        data = arduino.readline().decode('utf-8').strip()
+        if data == "hello":
+            return jsonify({"popup": True})
+    return jsonify({"popup": False})
 
 def validate_sensor_data(data):
     required_fields = ["albuminuria", "creatinine", "eGFR", "uric_acid"]

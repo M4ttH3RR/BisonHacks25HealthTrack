@@ -1,0 +1,77 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    color: #007bff; /* Blue color for headings */
+}
+
+/* Patient List Container */
+.patient-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* Individual Patient Card */
+.patient {
+    text-align: center;
+    width: 150px;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.patient:hover {
+    transform: scale(1.05); /* Slightly enlarge on hover */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* Add shadow on hover */
+}
+
+/* Patient Image */
+.patient img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%; /* Circular image */
+    object-fit: cover; /* Ensure the image covers the area */
+    border: 3px solid #007bff; /* Blue border around the image */
+}
+
+/* Patient Name */
+.patient p {
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #007bff; /* Blue color for the name */
+}
+
+/* Link Styling */
+.patient a {
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Inherit color from parent */
+}
+
+.popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 200px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 16px;
+    display: none; /* Initially hidden */
+}
+
+.popuptext {
+    text-align: center;
+}
