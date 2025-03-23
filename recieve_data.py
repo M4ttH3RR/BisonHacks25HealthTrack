@@ -1,21 +1,27 @@
 import serial
-import requests
-import schedule
 import time
 
+
 def main_func():
-    arduino = serial.Serial('com3', 9600)
-    print('Established serial connection to Arduino')
-    arduino_data = arduino.readline()
+    while True:
+        try:
+            arduino = serial.Serial('com3', 9600, timeout=2)  # Open connection
+            print('Established serial connection to Arduino')
 
-    decoded_values = str(arduino_data[0:len(arduino_data)].decode("utf-8"))
-    list_values = decoded_values.split()
-    print("List of Values:", list_values)
-    arduino.close()
-    print('Connection closed')
+            arduino_data = arduino.readline()
+            decoded_values = arduino_data.decode("utf-8").strip()
+            list_values = decoded_values.split()
 
-schedule.every(1).seconds.do(main_func)
+            print("List of Values:", list_values)
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+            arduino.close()
+            print('Connection closed')
+
+            break
+        except serial.SerialException:
+            print("Waiting for Arduino to connect...")
+            time.sleep(2)
+
+
+
+main_func()
