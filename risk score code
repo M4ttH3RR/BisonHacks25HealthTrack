@@ -1,0 +1,55 @@
+# DKD Risk Calculation Function
+def calculate_dkd_risk(albuminuria, creatinine, eGFR, uric_acid):
+    risk_score = 0
+
+    # Albuminuria Scoring
+    if albuminuria < 30:
+        risk_score += 0  # Normal
+    elif 30 <= albuminuria <= 300:
+        risk_score += 1  # Microalbuminuria (DKD Risk)
+    else:
+        risk_score += 2  # Overt albuminuria (High Risk)
+
+    # Serum Creatinine Scoring (for women)
+    if creatinine > 1.04:
+        risk_score += 1  # Elevated Creatinine
+
+    # eGFR Scoring
+    if eGFR > 90:
+        risk_score += 0  # Normal
+    elif 60 <= eGFR <= 89:
+        risk_score += 1  # Mild Decline
+    elif 30 <= eGFR <= 59:
+        risk_score += 2  # Moderate Decline
+    else:
+        risk_score += 3  # Severe Decline
+
+    # Uric Acid Scoring (for women)
+    if uric_acid > 6:
+        risk_score += 1  # High Uric Acid
+
+    # Risk Interpretation
+    if risk_score <= 2:
+        risk_level = "Low Risk"
+    elif 3 <= risk_score <= 4:
+        risk_level = "Moderate Risk"
+    else:
+        risk_level = "High Risk - Alert Provider"
+
+    return risk_score, risk_level
+
+# Example patient data from 2025-03-22 12:00
+# Female, 45 years old, 210 lbs (95.25 kg)
+# Estimated eGFR manually set to 40 (moderate decline)
+patient_data = {
+    "albuminuria": 90,       # mg/day (microalbuminuria)
+    "creatinine": 1.50,      # mg/dL (elevated for women)
+    "eGFR": 40,              # Estimated value (moderate decline)
+    "uric_acid": 7.5         # mg/dL (high for women)
+}
+
+# Run risk calculation
+risk_score, risk_level = calculate_dkd_risk(**patient_data)
+
+# Output the result
+print(f"Risk Score: {risk_score}, Risk Level: {risk_level}")
