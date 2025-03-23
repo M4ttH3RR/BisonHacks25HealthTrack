@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-
+import streamlit as st
 
 # -------------------------------------------------------------------
 # SECTION 1: DATA PROCESSING & FEATURE ENGINEERING
@@ -22,7 +22,7 @@ def classify_albuminuria(albuminuria):
 
 
 def preprocess_data(df):
-    """Processes dataset by cleaning timestamps, classifying albuminuria, and handling missing values."""
+    """Processes dataset by cleaning timestamps, classifying albumst.popover(labelinuria, and handling missing values."""
     # Convert timestamps to datetime format
     df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
 
@@ -132,6 +132,6 @@ if patient_risk >= 0.7:
         "Uric Acid": 7.5,
         "Risk Probability": patient_risk
     }
-    send_alert(alert_data, "https://your-api.com/alerts", "YOUR_API_KEY")
-else:
+    st.popover("label")
+ else:
     print("🟢 No alert sent. Risk below threshold.")
