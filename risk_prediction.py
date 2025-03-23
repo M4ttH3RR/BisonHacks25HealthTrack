@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 
 # -------------------------------------------------------------------
 # SECTION 1: DATA PROCESSING & FEATURE ENGINEERING
-# -------------------------------------------------------------------
+# ----- --------------------------------------------------------------
 
 def classify_albuminuria(albuminuria):
     """Classifies albuminuria levels into Normal, Micro, or Macro."""
