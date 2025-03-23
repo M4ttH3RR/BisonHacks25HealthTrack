@@ -40,3 +40,6 @@ st.markdown('<a href="/scheduling" class="schedule-btn">Schedule</a>', unsafe_al
 
 st.markdown('<a href="/messaging" class="schedule-btn">Message Patient</a>', unsafe_allow_html=True)
 
+if not st.session_state.get('alert_shown', False):
+    st.session_state.alert_shown = True
+    st.warning("🚨 High Risk Alert for Zia Abiodun!")
