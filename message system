@@ -1,0 +1,32 @@
+import streamlit as st
+
+# Title of the app
+st.title("🩺 Patient-Doctor Messaging System")
+
+# Sidebar user selection
+user_type = st.sidebar.selectbox("Login as:", ["Patient", "Doctor"])
+
+# Initialize session state for messages if it doesn't exist
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# Display chat history
+st.write("### Chat History")
+for msg in st.session_state.messages:
+    sender, text = msg
+    if sender == "Patient":
+        st.markdown(f"**🧑‍⚕️ Doctor:** {text}")
+    else:
+        st.markdown(f"**👨‍⚕️ Patient:** {text}")
+
+# Input field for new messages
+new_message = st.text_input("Type your message:")
+
+# Send button logic
+if st.button("Send Message"):
+    if new_message.strip():
+        # Add new message to chat history
+        st.session_state.messages.append((user_type, new_message))
+        st.experimental_rerun()  # Refresh to display new messages
+    else:
+        st.warning("Please enter a message before sending.")
