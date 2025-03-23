@@ -1,13 +1,21 @@
 import serial
 import requests
+import schedule
+import time
 
-arduino = serial.Serial('COM3', 9600)
+def main_func():
+    arduino = serial.Serial('com3', 9600)
+    print('Established serial connection to Arduino')
+    arduino_data = arduino.readline()
+
+    decoded_values = str(arduino_data[0:len(arduino_data)].decode("utf-8"))
+    list_values = decoded_values.split()
+    print("List of Values:", list_values)
+    arduino.close()
+    print('Connection closed')
+
+schedule.every(1).seconds.do(main_func)
 
 while True:
-    try:
-        data = arduino.readline().decode().strip()
-        if data:
-            response = requests.post("http://127.0.0.1:8000/upload-data/", json={"value": float(data)})
-            print(response.json())
-    except Exception as e:
-        print(f"Error: {e}")
+    schedule.run_pending()
+    time.sleep(1)
