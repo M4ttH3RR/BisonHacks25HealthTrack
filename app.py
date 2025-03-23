@@ -42,4 +42,7 @@ st.markdown('<a href="/messaging" class="schedule-btn">Message Patient</a>', uns
 
 if not st.session_state.get('alert_shown', False):
     st.session_state.alert_shown = True
+    st.warning("🚨 High Risk Alert for Julio Felez!")
+    st.warning("🚨 High Risk Alert for Lei Keita!")
+    st.warning("🚨 High Risk Alert for Jabari Adebayo!")
     st.warning("🚨 High Risk Alert for Zia Abiodun!")
